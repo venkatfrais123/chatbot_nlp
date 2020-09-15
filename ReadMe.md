@@ -1,4 +1,5 @@
-This chatbot was created for a food app, where the user can interact with the bot and get the restaurant details. NLP and RASA were used to build this chatbot.
+This chatbot was created for a food app, where the user can interact with the bot and get the restaurant details. NLP and RASA were used to build this chatbot. The application was also deployed on Slack using ngrok.
+
 
 absl-py==0.9.0
 aiofiles==0.5.0
