@@ -1,3 +1,5 @@
+This chatbot was created for a food app, where the user can interact with the bot and get the restaurant details. NLP and RASA were used to build this chatbot.
+
 absl-py==0.9.0
 aiofiles==0.5.0
 aiohttp==3.6.2
