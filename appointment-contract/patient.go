@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	ledgerapi "github.com/hyperledger/fabric-samples/commercial-paper/organization/magnetocorp/contract-go/ledger-api"
+	ledgerapi "booking-app-2/core-files/organization/patientorg/contract-go/ledger-api"
 )
 
 // CreateCommercialPaperKey creates a key for commercial papers
@@ -17,19 +17,19 @@ func CreatePatientKey(patientID string, userID string) string {
 }
 
 // Used for managing the fact status is private but want it in world state
-/*type commercialPaperAlias CommercialPaper
-type jsonCommercialPaper struct {
-	*commercialPaperAlias
-	State State  `json:"currentState"`
+type PatientAlias PatientInfo
+type PersonAlias Person
+type jsonPatient struct {
+	*PatientAlias
 	Class string `json:"class"`
 	Key   string `json:"key"`
-}*/
+}
 
 type Person struct {
-	PersonEmail     string `json:"personEmail"`
-	PersonPhone     string `json:"personPhone"`
 	PersonFirstName string `json:"personFirstName"`
 	PersonLastName  string `json:"personLastName"`
+	PersonEmail     string `json:"personEmail"`
+	PersonPhone     string `json:"personPhone"`
 	PersonAddress1  string `json:"personAddress1"`
 	PersonAddress2  string `json:"personAddress2"`
 	PersonCity      string `json:"personCity"`
@@ -39,42 +39,37 @@ type Person struct {
 
 // CommercialPaper defines a commercial paper
 type PatientInfo struct {
-	UserID             string `json:"userID"`
-	PatientID          string `json:"patientID"`
-	MemberID           string `json:"memberID"`
-	MemberOrganization string `json:"memberOrganization"`
-	ProviderID         string `json:"providerID"`
-	ProviderName       string `json:"providerName"`
-	CaregiverID        string `json:"caregiverID"`
-	CaregiverName      string `json:"caregiverName"`
-	*Person
-	//state State  `metadata:"currentState"`
-	Class string `json:"class"`
-	Key   string `json:"key"`
+	UserID             string       `json:"userID"`
+	PatientID          string       `json:"patientID"`
+	MemberID           string       `json:"memberID"`
+	MemberOrganization string       `json:"memberOrganization"`
+	ProviderID         string       `json:"providerID"`
+	ProviderName       string       `json:"providerName"`
+	CaregiverID        string       `json:"caregiverID"`
+	CaregiverName      string       `json:"caregiverName"`
+	PersonAlias        *PersonAlias `json:"person"`
+	class              string       `metadata:"class"`
+	key                string       `metadata:"key"`
 }
 
 // UnmarshalJSON special handler for managing JSON marshalling
-func (cp *PatientInfo) UnmarshalPatJSON(data []byte) error {
-	//jcp := jsonCommercialPaper{commercialPaperAlias: (*commercialPaperAlias)(cp)}
+func (cp *PatientInfo) UnmarshalJSON(data []byte) error {
+	jcp := jsonPatient{PatientAlias: (*PatientAlias)(cp)}
 
-	err := json.Unmarshal(data, cp)
+	err := json.Unmarshal(data, &jcp)
 
 	if err != nil {
 		return err
 	}
 
-	//cp.state = jcp.State
-
 	return nil
 }
 
 // MarshalJSON special handler for managing JSON marshalling
-func (cp PatientInfo) MarshalPatJSON() ([]byte, error) {
-	//jcp := jsonCommercialPaper{commercialPaperAlias: (*commercialPaperAlias)(&cp), Class: "org.appointment.patient", Key: ledgerapi.MakeKey(cp.Issuer, cp.PaperNumber)}
-	cp.Class = "org.appointment.patient"
-	cp.Key = ledgerapi.MakeKey("PATIENTS", cp.PatientID, cp.UserID)
+func (cp PatientInfo) MarshalJSON() ([]byte, error) {
+	jcp := jsonPatient{PatientAlias: (*PatientAlias)(&cp), Class: "org.appointmentbook.appointments", Key: ledgerapi.MakeKey(cp.PatientID, cp.UserID)}
 
-	return json.Marshal(cp)
+	return json.Marshal(&jcp)
 }
 
 func (cp *PatientInfo) GetMemberID() string {
@@ -125,12 +120,12 @@ func (cp *PatientInfo) SetCaregiverName(newCaregiverName string) {
 	cp.CaregiverName = newCaregiverName
 }
 
-func (cp *PatientInfo) GetPerson() Person {
-	return *cp.Person
+func (cp *PatientInfo) GetPerson() PersonAlias {
+	return *cp.PersonAlias
 }
 
-func (cp *PatientInfo) SetPerson(newPerson Person) {
-	cp.Person = &newPerson
+func (cp *PatientInfo) SetPerson(newPerson PersonAlias) {
+	cp.PersonAlias = &newPerson
 }
 
 // GetSplitKey returns values which should be used to form key
@@ -148,7 +143,7 @@ func Deserialize(bytes []byte, cp *PatientInfo) error {
 	err := json.Unmarshal(bytes, cp)
 
 	if err != nil {
-		return fmt.Errorf("Error deserializing Appointment. %s", err.Error())
+		return fmt.Errorf("Error deserializing. %s", err.Error())
 	}
 
 	return nil

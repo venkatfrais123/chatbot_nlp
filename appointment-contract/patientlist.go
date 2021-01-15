@@ -4,7 +4,7 @@
 
 package appointmentpatient
 
-import ledgerapi "github.com/hyperledger/fabric-samples/commercial-paper/organization/magnetocorp/contract-go/ledger-api"
+import ledgerapi "booking-app-2/core-files/organization/patientorg/contract-go/ledger-api"
 
 // ListInterface defines functionality needed
 // to interact with the world state on behalf
@@ -43,7 +43,7 @@ func (cpl *list) UpdatePatient(patient *PatientInfo) error {
 func newList(ctx TransactionContextInterface) *list {
 	stateList := new(ledgerapi.StateList)
 	stateList.Ctx = ctx
-	stateList.Name = "org.appointment.patientlist"
+	stateList.Name = "org.appointmentbook.patientlist"
 	stateList.Deserialize = func(bytes []byte, state ledgerapi.StateInterface) error {
 		return Deserialize(bytes, state.(*PatientInfo))
 	}
