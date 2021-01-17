@@ -5,9 +5,11 @@
 package ledgerapi
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	appointmentresp "github.com/venkatfrais123/chatbot_nlp/appointment-contract"
 )
 
 // StateListInterface functions that a state list
@@ -15,6 +17,7 @@ import (
 type StateListInterface interface {
 	AddState(StateInterface) error
 	GetState(string, StateInterface) error
+	GetStateByPartialCompositeKey(string, StateInterface) ([]*appointmentresp.PatientInfo, error)
 	UpdateState(StateInterface) error
 }
 
@@ -52,6 +55,36 @@ func (sl *StateList) GetState(key string, state StateInterface) error {
 	}
 
 	return sl.Deserialize(data, state)
+}
+
+func (sl *StateList) GetStateByPartialCompositeKey(searchByPart string, state StateInterface) ([]*appointmentresp.PatientInfo, error) {
+
+	var attributes []string
+	attributes = append(attributes, searchByPart)
+	fmt.Println("Attributes: ", attributes)
+
+	iterator, err := sl.Ctx.GetStub().GetStateByPartialCompositeKey(sl.Name, attributes)
+	if err != nil {
+		return nil, err
+	}
+	defer iterator.Close()
+
+	var records []*appointmentresp.PatientInfo
+	for iterator.HasNext() {
+		queryresponse, err := iterator.Next()
+		if err != nil {
+			return nil, err
+		}
+
+		var record appointmentresp.PatientInfo
+		err = json.Unmarshal(queryresponse.Value, &record)
+		if err != nil {
+			return nil, err
+		}
+
+		records = append(records, &record)
+	}
+	return records, nil
 }
 
 // UpdateState puts state into world state. Same as AddState but
