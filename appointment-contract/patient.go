@@ -8,11 +8,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	ledgerapi "booking-app-2/core-files/organization/patientorg/contract-go/ledger-api"
+	ledgerapi "github.com/venkatfrais123/chatbot_nlp/ledger-api"
 )
 
 // CreateCommercialPaperKey creates a key for commercial papers
 func CreatePatientKey(patientID string, userID string) string {
+	fmt.Println("Ledger Key: ", ledgerapi.MakeKey("PATIENTS", patientID, userID))
 	return ledgerapi.MakeKey("PATIENTS", patientID, userID)
 }
 
@@ -67,7 +68,7 @@ func (cp *PatientInfo) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON special handler for managing JSON marshalling
 func (cp PatientInfo) MarshalJSON() ([]byte, error) {
-	jcp := jsonPatient{PatientAlias: (*PatientAlias)(&cp), Class: "org.appointmentbook.appointments", Key: ledgerapi.MakeKey(cp.PatientID, cp.UserID)}
+	jcp := jsonPatient{PatientAlias: (*PatientAlias)(&cp), Class: "org.appointmentbook.appointments", Key: ledgerapi.MakeKey("PATIENTS", cp.PatientID, cp.UserID)}
 
 	return json.Marshal(&jcp)
 }

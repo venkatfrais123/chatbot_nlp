@@ -8,8 +8,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	appointmentresp "github.com/venkatfrais123/chatnbot_nlp/appointment-contract"
+
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
-	appointmentresp "github.com/venkatfrais123/chatbot_nlp/appointment-contract"
 )
 
 // StateListInterface functions that a state list
@@ -17,7 +18,7 @@ import (
 type StateListInterface interface {
 	AddState(StateInterface) error
 	GetState(string, StateInterface) error
-	GetStateByPartialCompositeKey(string, StateInterface) ([]*appointmentresp.PatientInfo, error)
+	GetStateByPartialCompositeKey(string) ([]*appointmentresp.PatientInfo, error)
 	UpdateState(StateInterface) error
 }
 
@@ -57,7 +58,7 @@ func (sl *StateList) GetState(key string, state StateInterface) error {
 	return sl.Deserialize(data, state)
 }
 
-func (sl *StateList) GetStateByPartialCompositeKey(searchByPart string, state StateInterface) ([]*appointmentresp.PatientInfo, error) {
+func (sl *StateList) GetStateByPartialCompositeKey(searchByPart string) ([]*appointmentresp.PatientInfo, error) {
 
 	var attributes []string
 	attributes = append(attributes, searchByPart)

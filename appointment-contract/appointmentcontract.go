@@ -58,6 +58,19 @@ func (c *Contract) ListPatient(ctx TransactionContextInterface, userID string, p
 	return patient, nil
 }
 
+// Patient Query...
+func (c *Contract) ListAllPatient(ctx TransactionContextInterface) ([]*PatientInfo, error) {
+	fmt.Println("Patient Query...")
+
+	patient, err := ctx.GetPatientList().GetAllPatient("PATIENTS")
+
+	if err != nil {
+		return nil, err
+	}
+
+	return patient, nil
+}
+
 // Update Patient...
 func (c *Contract) UpdatePatient(ctx TransactionContextInterface, userID string, patientID string, providerID string, providerName string, caregiverID string, caregiverName string, person PersonAlias) (*PatientInfo, error) {
 	fmt.Println("Patient Update...")
