@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	ledgerapi "github.com/venkatfrais123/chatbot_nlp/provider/ledger-api"
+
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
@@ -48,11 +50,11 @@ func (c *Contract) CreateProvider(ctx TransactionContextInterface, userID string
 }
 
 // ListProvider ...
-func (c *Contract) ListProvider(ctx TransactionContextInterface, userID string, providerID string) (*ProviderInfo, error) {
+func (c *Contract) ListProvider(ctx TransactionContextInterface, userID string) (*ProviderInfo, error) {
 	fmt.Println("Provider Query...")
 
-	fmt.Println("ProviderID: ", providerID)
-	provider, err := ctx.GetProviderList().GetProvider(providerID, userID)
+	fmt.Println("ProviderID: ", userID)
+	provider, err := ctx.GetProviderList().GetProvider(userID)
 
 	if err != nil {
 		return nil, err
@@ -67,7 +69,7 @@ func (c *Contract) UpdateProvider(ctx TransactionContextInterface, userID string
 
 	fmt.Println("Provider ID: ", providerID)
 
-	provider, err := ctx.GetProviderList().GetProvider(providerID, userID)
+	provider, err := ctx.GetProviderList().GetProvider(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -86,4 +88,19 @@ func (c *Contract) UpdateProvider(ctx TransactionContextInterface, userID string
 	}
 
 	return provider, nil
+}
+
+// ListAllProvider Query...
+func (c *Contract) ListAllProvider(ctx TransactionContextInterface) ([]ledgerapi.QueryResult, error) {
+	fmt.Println("Provider Query...")
+
+	index := "" + "~" + ""
+
+	provider, err := ctx.GetProviderList().GetProviderByPartialCompositeKey(index, "PROVIDERS")
+
+	if err != nil {
+		return nil, err
+	}
+
+	return provider, err
 }

@@ -12,9 +12,9 @@ import (
 )
 
 // CreateProviderKey ...
-func CreateProviderKey(providerID string, userID string) string {
-	fmt.Println("Ledger Key: ", ledgerapi.MakeKey("PROVIDERS", providerID, userID))
-	return ledgerapi.MakeKey("PROVIDERS", providerID, userID)
+func CreateProviderKey(userID string) string {
+	fmt.Println("Ledger Key: ", ledgerapi.MakeKey("PROVIDERS", userID))
+	return ledgerapi.MakeKey("PROVIDERS", userID)
 }
 
 // ProviderAlias ...
@@ -84,7 +84,7 @@ func (cp *ProviderInfo) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON special handler for managing JSON marshalling
 func (cp ProviderInfo) MarshalJSON() ([]byte, error) {
-	jcp := jsonProvider{ProviderAlias: (*ProviderAlias)(&cp), Class: "org.appointmentbook.providers", Key: ledgerapi.MakeKey("PROVIDERS", cp.ProviderID, cp.UserID)}
+	jcp := jsonProvider{ProviderAlias: (*ProviderAlias)(&cp), Class: "org.appointmentbook.providers", Key: ledgerapi.MakeKey("PROVIDERS", cp.UserID)}
 
 	return json.Marshal(&jcp)
 }
@@ -161,7 +161,7 @@ func (cp *ProviderInfo) SetInsAddress(newAddress InstitutionAddressAlias) {
 
 // GetSplitKey returns values which should be used to form key
 func (cp *ProviderInfo) GetSplitKey() []string {
-	return []string{"PROVIDERS", cp.ProviderID, cp.UserID}
+	return []string{"PROVIDERS", cp.UserID}
 }
 
 // Serialize formats the commercial paper as JSON bytes

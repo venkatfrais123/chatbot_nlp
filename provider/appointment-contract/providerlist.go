@@ -13,7 +13,8 @@ import (
 // of a commercial paper
 type ListInterface interface {
 	AddProvider(*ProviderInfo) error
-	GetProvider(string, string) (*ProviderInfo, error)
+	GetProvider(string) (*ProviderInfo, error)
+	GetProviderByPartialCompositeKey(string, string) ([]ledgerapi.QueryResult, error)
 	UpdateProvider(*ProviderInfo) error
 }
 
@@ -27,16 +28,27 @@ func (cpl *list) AddProvider(provider *ProviderInfo) error {
 }
 
 // GetProvider ..
-func (cpl *list) GetProvider(providerID string, userID string) (*ProviderInfo, error) {
+func (cpl *list) GetProvider(userID string) (*ProviderInfo, error) {
 	cp := new(ProviderInfo)
 
-	err := cpl.stateList.GetState(CreateProviderKey(providerID, userID), cp)
+	err := cpl.stateList.GetState(CreateProviderKey(userID), cp)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return cp, nil
+}
+
+func (cpl *list) GetProviderByPartialCompositeKey(providerKey string, searchByPart string) ([]ledgerapi.QueryResult, error) {
+	//cp := []QueryResult{}
+
+	cp, err := cpl.stateList.GetStateByPartialCompositeKey(providerKey, searchByPart)
+	if err != nil {
+		return nil, err
+	}
+
+	return cp, err
 }
 
 // UpdateProvider ....
