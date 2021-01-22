@@ -14,6 +14,7 @@ import (
 type ListInterface interface {
 	AddAppointment(*AppointmentInfo) error
 	GetAppointment(string, string) (*AppointmentInfo, error)
+	GetAppointmentByPartialCompositeKey(string, string) ([]ledgerapi.QueryResult, error)
 	UpdateAppointment(*AppointmentInfo) error
 }
 
@@ -35,6 +36,17 @@ func (cpl *list) GetAppointment(patientID string, appointmentID string) (*Appoin
 	}
 
 	return cp, nil
+}
+
+func (cpl *list) GetAppointmentByPartialCompositeKey(appointmentKey string, searchByPart string) ([]ledgerapi.QueryResult, error) {
+	//cp := []QueryResult{}
+
+	cp, err := cpl.stateList.GetStateByPartialCompositeKey(appointmentKey, searchByPart)
+	if err != nil {
+		return nil, err
+	}
+
+	return cp, err
 }
 
 func (cpl *list) UpdateAppointment(appointment *AppointmentInfo) error {

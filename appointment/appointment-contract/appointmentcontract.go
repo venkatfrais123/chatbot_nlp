@@ -5,7 +5,10 @@
 package appointmentcontract
 
 import (
+	"encoding/json"
 	"fmt"
+
+	ledgerapi "github.com/venkatfrais123/chatbot_nlp/appointment/ledger-api"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
@@ -163,4 +166,61 @@ func (c *Contract) UpdateAppointmentCg(ctx TransactionContextInterface, patientI
 	}
 
 	return appointment, nil
+}
+
+// ListAllApps Query...
+func (c *Contract) ListAllApps(ctx TransactionContextInterface) ([]ledgerapi.QueryResult, error) {
+	fmt.Println("Appointment Query...")
+
+	index := "" + "~" + "" + "~" + ""
+
+	appointment, err := ctx.GetAppointmentList().GetAppointmentByPartialCompositeKey(index, "APPOINTMENTS")
+
+	if err != nil {
+		return nil, err
+	}
+
+	return appointment, err
+}
+
+// UserApps ..
+func (c *Contract) UserApps(ctx TransactionContextInterface, userID string, orgname string) (rets []*AppointmentInfo, err error) {
+
+	var queryString string
+
+	if orgname == "patientorg" {
+		queryString = `{"selector": {"patientID":{"$eq":"` + userID + `"}}}`
+	} else if orgname == "providerorg" {
+		queryString = `{"selector": {"providerID":{"$eq":"` + userID + `"}}}`
+	} else {
+		queryString = `{"selector": {"caregiverID":{"$eq":"` + userID + `"}}}`
+	}
+
+	fmt.Println("QueryStrng: ", queryString)
+
+	resultsIterator, _, err := ctx.GetStub().GetQueryResultWithPagination(queryString, 0, "")
+	fmt.Println("ResultIterator: ", resultsIterator)
+	if err != nil {
+		return
+	}
+	defer resultsIterator.Close()
+
+	for resultsIterator.HasNext() {
+		queryResponse, err2 := resultsIterator.Next()
+		if err2 != nil {
+			return nil, err2
+		}
+
+		fmt.Println("queryresp: ", queryResponse.Value)
+
+		res := new(AppointmentInfo)
+		if err = json.Unmarshal(queryResponse.Value, res); err != nil {
+			return
+		}
+
+		rets = append(rets, res)
+	}
+	fmt.Println("Rets: ", rets)
+
+	return rets, err
 }

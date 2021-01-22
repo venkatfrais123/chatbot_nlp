@@ -1,0 +1,10 @@
+{
+    "index": {
+        "fields": [
+            "caregiverID"
+        ]
+    },
+    "ddoc": "indexIdDoc",
+    "name": "indexCgId",
+    "type": "json"
+}
