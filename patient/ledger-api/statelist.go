@@ -5,17 +5,57 @@
 package ledgerapi
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
+
+// PersonAlias ...
+type PersonAlias Person
+
+// Person ...
+type Person struct {
+	PersonFirstName string `json:"personFirstName"`
+	PersonLastName  string `json:"personLastName"`
+	PersonEmail     string `json:"personEmail"`
+	PersonPhone     string `json:"personPhone"`
+	PersonAddress1  string `json:"personAddress1"`
+	PersonAddress2  string `json:"personAddress2"`
+	PersonCity      string `json:"personCity"`
+	PersonState     string `json:"personState"`
+	PersonZip       string `json:"personZip"`
+}
+
+// PatientInfo ..
+type PatientInfo struct {
+	UserID             string       `json:"userID"`
+	PatientID          string       `json:"patientID"`
+	MemberID           string       `json:"memberID"`
+	MemberOrganization string       `json:"memberOrganization"`
+	ProviderID         string       `json:"providerID"`
+	ProviderName       string       `json:"providerName"`
+	CaregiverID        string       `json:"caregiverID"`
+	CaregiverName      string       `json:"caregiverName"`
+	PersonAlias        *PersonAlias `json:"person"`
+	//class              string       `metadata:"class"`
+	//key                string       `metadata:"key"`
+	Class string `json:"class"`
+	Key   string `json:"key"`
+}
+
+type QueryResult struct {
+	Key    string `json:"Key"`
+	Record *PatientInfo
+}
 
 // StateListInterface functions that a state list
 // should have
 type StateListInterface interface {
 	AddState(StateInterface) error
 	GetState(string, StateInterface) error
-	//GetStateByPartialCompositeKey(string) ([]*patientmodel.PatientInfo, error)
+	GetStateByPartialCompositeKey(string, string) ([]QueryResult, error)
+	GetStateByPagination() ([]*PatientInfo, error)
 	UpdateState(StateInterface) error
 }
 
@@ -57,9 +97,9 @@ func (sl *StateList) GetState(key string, state StateInterface) error {
 	return sl.Deserialize(data, state)
 }
 
-/*
-func (sl *StateList) GetStateByPartialCompositeKey(searchByPart string) ([]*patientmodel.PatientInfo, error) {
-
+// GetStateByPartialCompositeKey ...
+func (sl *StateList) GetStateByPartialCompositeKey(key string, searchByPart string) ([]QueryResult, error) {
+	fmt.Println("Key: ", key)
 	var attributes []string
 	attributes = append(attributes, searchByPart)
 	fmt.Println("Attributes: ", attributes)
@@ -70,24 +110,53 @@ func (sl *StateList) GetStateByPartialCompositeKey(searchByPart string) ([]*pati
 	}
 	defer iterator.Close()
 
-	var records []*patientmodel.PatientInfo
+	results := []QueryResult{}
+
 	for iterator.HasNext() {
-		queryresponse, err := iterator.Next()
+		queryResponse, err := iterator.Next()
+		fmt.Println("queryResponse: ", queryResponse)
+
 		if err != nil {
 			return nil, err
 		}
 
-		var record patientmodel.PatientInfo
-		err = json.Unmarshal(queryresponse.Value, &record)
-		if err != nil {
-			return nil, err
-		}
+		patient := new(PatientInfo)
+		_ = json.Unmarshal(queryResponse.Value, patient)
 
-		records = append(records, &record)
+		queryResult := QueryResult{Key: queryResponse.Key, Record: patient}
+		results = append(results, queryResult)
 	}
-	return records, nil
+	fmt.Println("Final: ", results)
+	return results, nil
 }
-*/
+
+func (sl *StateList) GetStateByPagination() (rets []*PatientInfo, err error) {
+	resultsIterator, _, err := sl.Ctx.GetStub().GetQueryResultWithPagination(`{"selector": {"id":{"$ne":"-"}}}`, 0, "")
+	fmt.Println("ResultIterator: ", resultsIterator)
+	if err != nil {
+		return
+	}
+	defer resultsIterator.Close()
+
+	for resultsIterator.HasNext() {
+		queryResponse, err2 := resultsIterator.Next()
+		if err2 != nil {
+			return nil, err2
+		}
+
+		fmt.Println("queryresp: ", queryResponse.Value)
+
+		res := new(PatientInfo)
+		if err = json.Unmarshal(queryResponse.Value, res); err != nil {
+			return
+		}
+
+		rets = append(rets, res)
+	}
+	fmt.Println("Rets: ", rets)
+
+	return
+}
 
 // UpdateState puts state into world state. Same as AddState but
 // separate as semantically different

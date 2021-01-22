@@ -14,6 +14,7 @@ import (
 type ListInterface interface {
 	AddPatient(*PatientInfo) error
 	GetPatient(string) (*PatientInfo, error)
+	GetPatientByPartialCompositeKey(string, string) ([]ledgerapi.QueryResult, error)
 	UpdatePatient(*PatientInfo) error
 }
 
@@ -39,6 +40,17 @@ func (cpl *list) GetPatient(userID string) (*PatientInfo, error) {
 	}
 
 	return cp, nil
+}
+
+func (cpl *list) GetPatientByPartialCompositeKey(patientKey string, searchByPart string) ([]ledgerapi.QueryResult, error) {
+	//cp := []QueryResult{}
+
+	cp, err := cpl.stateList.GetStateByPartialCompositeKey(patientKey, searchByPart)
+	if err != nil {
+		return nil, err
+	}
+
+	return cp, err
 }
 
 func (cpl *list) UpdatePatient(patient *PatientInfo) error {

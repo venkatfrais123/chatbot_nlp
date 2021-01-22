@@ -9,13 +9,18 @@ import (
 	"fmt"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	ledgerapi "github.com/venkatfrais123/chatbot_nlp/patient/ledger-api"
 )
 
-// Contract chaincode that defines
-// the business logic for managing commercial
-// paper
+// Contract ...
 type Contract struct {
 	contractapi.Contract
+}
+
+// QueryResult ..
+type QueryResult struct {
+	Key    string `json:"Key"`
+	Record *PatientInfo
 }
 
 // Instantiate does nothing
@@ -74,10 +79,10 @@ func (c *Contract) CreatePatient(ctx TransactionContextInterface, userID string,
 }
 
 // ListPatient Query...
-func (c *Contract) ListPatient(ctx TransactionContextInterface, userID string, patientID string) (*PatientInfo, error) {
+func (c *Contract) ListPatient(ctx TransactionContextInterface, userID string) (*PatientInfo, error) {
 	fmt.Println("Patient Query...")
 
-	fmt.Println("PatientID: ", patientID)
+	fmt.Println("PatientID: ", userID)
 	patient, err := ctx.GetPatientList().GetPatient(userID)
 
 	if err != nil {
@@ -114,59 +119,46 @@ func (c *Contract) UpdatePatient(ctx TransactionContextInterface, userID string,
 	return patient, nil
 }
 
-/*
-// CreateAppointment creating a new appointment
-func (c *Contract) CreateAppointment(ctx TransactionContextInterfaceApp, userID string, appointmentID string, patientID string, providerID string, newProviderID string, caregiverID string, appointmentStart string, appointmentEnd string, appointmentDescription string, appointmentType string, acceptedByPatient string, acceptedByProvider string, AcceptedByCaregiver string, appointmentStatus string, appointmentCreationDate string, appointmentUpdateDate string, cancellationReason string) (*AppointmentInfo, error) {
-	appointment := AppointmentInfo{UserID: userID, AppointmentID: appointmentID, PatientID: patientID, ProviderID: providerID, NewProviderID: newProviderID, CaregiverID: caregiverID, AppointmentStart: appointmentStart, AppointmentEnd: appointmentEnd, AppointmentDescription: appointmentDescription, AppointmentType: appointmentType, AcceptedByPatient: acceptedByPatient, AcceptedByProvider: acceptedByProvider, AcceptedByCaregiver: AcceptedByCaregiver, AppointmentStatus: appointmentStatus, AppointmentCreationDate: appointmentCreationDate, AppointmentUpdateDate: appointmentUpdateDate, CancellationReason: cancellationReason}
+// ListAllPatient Query...
+func (c *Contract) ListAllPatient(ctx TransactionContextInterface) ([]ledgerapi.QueryResult, error) {
+	fmt.Println("Patient Query...")
 
-	err := ctx.GetAppointmentList().AddAppointment(&appointment)
+	index := "" + "~" + ""
+
+	patient, err := ctx.GetPatientList().GetPatientByPartialCompositeKey(index, "PATIENTS")
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &appointment, nil
+	return patient, err
 }
 
-// UpdateAppointmentPat Appointment for Patient...
-func (c *Contract) UpdateAppointmentPat(ctx TransactionContextInterfaceApp, patientID string, appointmentID string, appointmentUpdateDate string, acceptedByPatient string, cancellationReason string) (*AppointmentInfo, error) {
-	fmt.Println("Appointment Update by patient...")
-
-	appointment, err := ctx.GetAppointmentList().GetAppointment(patientID, appointmentID)
+// Index ..
+func (c *Contract) Index(ctx TransactionContextInterface) (rets []*PatientInfo, err error) {
+	resultsIterator, _, err := ctx.GetStub().GetQueryResultWithPagination(`{"selector": {"_id":{"$ne":"-"}}}`, 0, "")
+	fmt.Println("ResultIterator: ", resultsIterator)
 	if err != nil {
-		return nil, err
+		return
 	}
-	fmt.Println("Appointment Details Before Update: ", appointment)
+	defer resultsIterator.Close()
 
-	if acceptedByPatient == "true" {
-		appointment.SetAcceptedByPatient(acceptedByPatient)
-		appointment.SetAppointmentStatus("AppointmentAcceptedByPatient")
-		appointment.SetAppointmentUpdateDate(appointmentUpdateDate)
-	} else {
-		appointment.SetAcceptedByPatient(acceptedByPatient)
-		appointment.SetAppointmentStatus("AppointmentRejectedByPatient")
-		appointment.SetAppointmentUpdateDate(appointmentUpdateDate)
-		appointment.SetCancellationReason(cancellationReason)
+	for resultsIterator.HasNext() {
+		queryResponse, err2 := resultsIterator.Next()
+		if err2 != nil {
+			return nil, err2
+		}
+
+		fmt.Println("queryresp: ", queryResponse.Value)
+
+		res := new(PatientInfo)
+		if err = json.Unmarshal(queryResponse.Value, res); err != nil {
+			return
+		}
+
+		rets = append(rets, res)
 	}
+	fmt.Println("Rets: ", rets)
 
-	err = ctx.GetAppointmentList().UpdateAppointment(appointment)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return appointment, nil
+	return rets, err
 }
-
-// ListAppointment Query...
-func (c *Contract) ListAppointment(ctx TransactionContextInterfaceApp, patientID string, appointmentID string) (*AppointmentInfo, error) {
-	fmt.Println("Appointment Query...")
-
-	appointment, err := ctx.GetAppointmentList().GetAppointment(patientID, appointmentID)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return appointment, nil
-} */
