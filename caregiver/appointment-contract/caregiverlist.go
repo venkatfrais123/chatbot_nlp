@@ -13,7 +13,8 @@ import (
 // of a commercial paper
 type ListInterface interface {
 	AddCaregiver(*CaregiverInfo) error
-	GetCaregiver(string, string) (*CaregiverInfo, error)
+	GetCaregiver(string) (*CaregiverInfo, error)
+	GetCaregiverByPartialCompositeKey(string, string) ([]ledgerapi.QueryResult, error)
 	UpdateCaregiver(*CaregiverInfo) error
 }
 
@@ -27,10 +28,10 @@ func (cpl *list) AddCaregiver(caregiver *CaregiverInfo) error {
 	return cpl.stateList.AddState(caregiver)
 }
 
-func (cpl *list) GetCaregiver(caregiverID string, userID string) (*CaregiverInfo, error) {
+func (cpl *list) GetCaregiver(userID string) (*CaregiverInfo, error) {
 	cp := new(CaregiverInfo)
 
-	err := cpl.stateList.GetState(CreateCaregiverKey(caregiverID, userID), cp)
+	err := cpl.stateList.GetState(CreateCaregiverKey(userID), cp)
 
 	if err != nil {
 		return nil, err
@@ -41,6 +42,17 @@ func (cpl *list) GetCaregiver(caregiverID string, userID string) (*CaregiverInfo
 
 func (cpl *list) UpdateCaregiver(caregiver *CaregiverInfo) error {
 	return cpl.stateList.UpdateState(caregiver)
+}
+
+func (cpl *list) GetCaregiverByPartialCompositeKey(caregiverKey string, searchByPart string) ([]ledgerapi.QueryResult, error) {
+	//cp := []QueryResult{}
+
+	cp, err := cpl.stateList.GetStateByPartialCompositeKey(caregiverKey, searchByPart)
+	if err != nil {
+		return nil, err
+	}
+
+	return cp, err
 }
 
 // NewList create a new list from context

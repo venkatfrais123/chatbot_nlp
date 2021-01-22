@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	ledgerapi "github.com/venkatfrais123/chatbot_nlp/caregiver/ledger-api"
 )
 
 // Contract chaincode that defines
@@ -23,7 +24,7 @@ func (c *Contract) Instantiate() {
 	fmt.Println("Instantiated")
 }
 
-// Creates a new caregiver
+// CreateCaregiver ...
 func (c *Contract) CreateCaregiver(ctx TransactionContextInterface, userID string, person string, caregiverID string) (*CaregiverInfo, error) {
 
 	var personresponse Person
@@ -43,12 +44,12 @@ func (c *Contract) CreateCaregiver(ctx TransactionContextInterface, userID strin
 	return &caregiver, nil
 }
 
-// Caregiver Query...
-func (c *Contract) ListCaregiver(ctx TransactionContextInterface, userID string, caregiverID string) (*CaregiverInfo, error) {
+// ListCaregiver Query...
+func (c *Contract) ListCaregiver(ctx TransactionContextInterface, userID string) (*CaregiverInfo, error) {
 	fmt.Println("Caregiver Query...")
 
-	fmt.Println("CaregiverID: ", caregiverID)
-	caregiver, err := ctx.GetCaregiverList().GetCaregiver(caregiverID, userID)
+	fmt.Println("CaregiverID: ", userID)
+	caregiver, err := ctx.GetCaregiverList().GetCaregiver(userID)
 
 	if err != nil {
 		return nil, err
@@ -57,13 +58,13 @@ func (c *Contract) ListCaregiver(ctx TransactionContextInterface, userID string,
 	return caregiver, nil
 }
 
-// Update Caregiver...
+// UpdateCaregiver ...
 func (c *Contract) UpdateCaregiver(ctx TransactionContextInterface, userID string, person PersonAlias, caregiverID string) (*CaregiverInfo, error) {
 	fmt.Println("Caregiver Update...")
 
 	fmt.Println("Caregiver ID: ", caregiverID)
 
-	caregiver, err := ctx.GetCaregiverList().GetCaregiver(caregiverID, userID)
+	caregiver, err := ctx.GetCaregiverList().GetCaregiver(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -78,4 +79,19 @@ func (c *Contract) UpdateCaregiver(ctx TransactionContextInterface, userID strin
 	}
 
 	return caregiver, nil
+}
+
+// ListAllCaregiver Query...
+func (c *Contract) ListAllCaregiver(ctx TransactionContextInterface) ([]ledgerapi.QueryResult, error) {
+	fmt.Println("Caregiver Query...")
+
+	index := "" + "~" + ""
+
+	caregiver, err := ctx.GetCaregiverList().GetCaregiverByPartialCompositeKey(index, "CAREGIVERS")
+
+	if err != nil {
+		return nil, err
+	}
+
+	return caregiver, err
 }

@@ -11,14 +11,16 @@ import (
 	ledgerapi "github.com/venkatfrais123/chatbot_nlp/caregiver/ledger-api"
 )
 
-// CreateCommercialPaperKey creates a key for commercial papers
-func CreateCaregiverKey(caregiverID string, userID string) string {
-	fmt.Println("Ledger Key: ", ledgerapi.MakeKey("CAREGIVERS", caregiverID, userID))
-	return ledgerapi.MakeKey("CAREGIVERS", caregiverID, userID)
+// CreateCaregiverKey ...
+func CreateCaregiverKey(userID string) string {
+	fmt.Println("Ledger Key: ", ledgerapi.MakeKey("CAREGIVERS", userID))
+	return ledgerapi.MakeKey("CAREGIVERS", userID)
 }
 
-// Used for managing the fact status is private but want it in world state
+// CaregiverAlias ...
 type CaregiverAlias CaregiverInfo
+
+// PersonAlias ..
 type PersonAlias Person
 type jsonCaregiver struct {
 	*CaregiverAlias
@@ -26,6 +28,7 @@ type jsonCaregiver struct {
 	Key   string `json:"key"`
 }
 
+// Person ..
 type Person struct {
 	PersonFirstName string `json:"personFirstName"`
 	PersonLastName  string `json:"personLastName"`
@@ -38,7 +41,7 @@ type Person struct {
 	PersonZip       string `json:"personZip"`
 }
 
-// CommercialPaper defines a commercial paper
+// CaregiverInfo ...
 type CaregiverInfo struct {
 	UserID      string       `json:"userID"`
 	PersonAlias *PersonAlias `json:"person"`
@@ -62,22 +65,24 @@ func (cp *CaregiverInfo) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON special handler for managing JSON marshalling
 func (cp CaregiverInfo) MarshalJSON() ([]byte, error) {
-	jcp := jsonCaregiver{CaregiverAlias: (*CaregiverAlias)(&cp), Class: "org.appointmentbook.caregivers", Key: ledgerapi.MakeKey("CAREGIVERS", cp.CaregiverID, cp.UserID)}
+	jcp := jsonCaregiver{CaregiverAlias: (*CaregiverAlias)(&cp), Class: "org.appointmentbook.caregivers", Key: ledgerapi.MakeKey("CAREGIVERS", cp.UserID)}
 
 	return json.Marshal(&jcp)
 }
 
+// GetPerson ...
 func (cp *CaregiverInfo) GetPerson() PersonAlias {
 	return *cp.PersonAlias
 }
 
+// SetPerson ..
 func (cp *CaregiverInfo) SetPerson(newPerson PersonAlias) {
 	cp.PersonAlias = &newPerson
 }
 
 // GetSplitKey returns values which should be used to form key
 func (cp *CaregiverInfo) GetSplitKey() []string {
-	return []string{"CAREGIVERS", cp.CaregiverID, cp.UserID}
+	return []string{"CAREGIVERS", cp.UserID}
 }
 
 // Serialize formats the commercial paper as JSON bytes
