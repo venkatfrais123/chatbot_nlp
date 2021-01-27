@@ -104,3 +104,32 @@ func (c *Contract) ListAllProvider(ctx TransactionContextInterface) ([]ledgerapi
 
 	return provider, err
 }
+
+// Index ..
+func (c *Contract) Index(ctx TransactionContextInterface) (rets []*ProviderInfo, err error) {
+	resultsIterator, _, err := ctx.GetStub().GetQueryResultWithPagination(`{"selector": {"_id":{"$ne":"-"}}}`, 0, "")
+	fmt.Println("ResultIterator: ", resultsIterator)
+	if err != nil {
+		return
+	}
+	defer resultsIterator.Close()
+
+	for resultsIterator.HasNext() {
+		queryResponse, err2 := resultsIterator.Next()
+		if err2 != nil {
+			return nil, err2
+		}
+
+		fmt.Println("queryresp: ", queryResponse.Value)
+
+		res := new(ProviderInfo)
+		if err = json.Unmarshal(queryResponse.Value, res); err != nil {
+			return
+		}
+
+		rets = append(rets, res)
+	}
+	fmt.Println("Rets: ", rets)
+
+	return rets, err
+}

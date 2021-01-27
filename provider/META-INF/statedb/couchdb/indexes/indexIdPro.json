@@ -1,0 +1,10 @@
+{
+    "index": {
+        "fields": [
+            "_id"
+        ]
+    },
+    "ddoc": "indexIdDoc",
+    "name": "indexIdPro",
+    "type": "json"
+}

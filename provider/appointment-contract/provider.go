@@ -164,12 +164,12 @@ func (cp *ProviderInfo) GetSplitKey() []string {
 	return []string{"PROVIDERS", cp.UserID}
 }
 
-// Serialize formats the commercial paper as JSON bytes
+// Serialize formats as JSON bytes
 func (cp *ProviderInfo) Serialize() ([]byte, error) {
 	return json.Marshal(cp)
 }
 
-// Deserialize formats the commercial paper from JSON bytes
+// Deserialize formats from JSON bytes
 func Deserialize(bytes []byte, cp *ProviderInfo) error {
 	err := json.Unmarshal(bytes, cp)
 
