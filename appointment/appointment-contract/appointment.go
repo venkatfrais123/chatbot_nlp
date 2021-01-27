@@ -11,7 +11,7 @@ import (
 	ledgerapi "github.com/venkatfrais123/chatbot_nlp/appointment/ledger-api"
 )
 
-// CreateAppointmentKey creates a key for commercial papers
+// CreateAppointmentKey creates a key for appointments
 func CreateAppointmentKey(patientID string, appointmentID string) string {
 	fmt.Println("Ledger Key: ", ledgerapi.MakeKey("APPOINTMENTS", patientID, appointmentID))
 	return ledgerapi.MakeKey("APPOINTMENTS", patientID, appointmentID)
@@ -233,12 +233,12 @@ func (cp *AppointmentInfo) GetSplitKey() []string {
 	return []string{"APPOINTMENTS", cp.PatientID, cp.AppointmentID}
 }
 
-// Serialize formats the commercial paper as JSON bytes
+// Serialize formats as JSON bytes
 func (cp *AppointmentInfo) Serialize() ([]byte, error) {
 	return json.Marshal(cp)
 }
 
-// Deserialize formats the commercial paper from JSON bytes
+// Deserialize formats from JSON bytes
 func Deserialize(bytes []byte, cp *AppointmentInfo) error {
 	err := json.Unmarshal(bytes, cp)
 

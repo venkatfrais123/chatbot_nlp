@@ -1,0 +1,10 @@
+{
+    "index": {
+        "fields": [
+            "newProviderID"
+        ]
+    },
+    "ddoc": "indexIdDoc",
+    "name": "indexNewProId",
+    "type": "json"
+}

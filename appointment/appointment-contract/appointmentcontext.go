@@ -18,8 +18,7 @@ type TransactionContextInterface interface {
 }
 
 // TransactionContext implementation of
-// TransactionContextInterface for use with
-// commercial paper contract
+// TransactionContextInterface
 type TransactionContext struct {
 	contractapi.TransactionContext
 	appointmentList *list

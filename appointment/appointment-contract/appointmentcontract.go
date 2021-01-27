@@ -14,8 +14,7 @@ import (
 )
 
 // Contract chaincode that defines
-// the business logic for managing commercial
-// paper
+// the business logic
 type Contract struct {
 	contractapi.Contract
 }
@@ -128,6 +127,8 @@ func (c *Contract) ReferAppointment(ctx TransactionContextInterface, patientID s
 	appointment.SetNewProviderID(newProviderID)
 	appointment.SetAppointmentStatus("Appointment referred to new Provider")
 	appointment.SetAppointmentUpdateDate(appointmentUpdateDate)
+	// 01/26 updated
+	appointment.SetAcceptedByCaregiver("NA")
 
 	err = ctx.GetAppointmentList().UpdateAppointment(appointment)
 
@@ -148,8 +149,16 @@ func (c *Contract) UpdateAppointmentCg(ctx TransactionContextInterface, patientI
 	}
 	fmt.Println("Appointment Details Before Update: ", appointment)
 
-	if acceptedByCaregiver == "true" {
+	if acceptedByCaregiver == "true" && appointment.NewProviderID == "NA" {
+		fmt.Println("New Provider ID: ", appointment.NewProviderID)
 		appointment.SetAcceptedByCaregiver(acceptedByCaregiver)
+		appointment.SetAppointmentStatus("AppointmentAcceptedByCaregiver")
+		appointment.SetAppointmentUpdateDate(appointmentUpdateDate)
+		// 01/26 - Case 5
+	} else if appointment.NewProviderID != "NA" && acceptedByCaregiver == "true" {
+		fmt.Println("New Provider ID: ", appointment.NewProviderID)
+		appointment.SetAcceptedByCaregiver(acceptedByCaregiver)
+		appointment.SetAcceptedByProvider("NA")
 		appointment.SetAppointmentStatus("AppointmentAcceptedByCaregiver")
 		appointment.SetAppointmentUpdateDate(appointmentUpdateDate)
 	} else {
@@ -191,7 +200,7 @@ func (c *Contract) UserApps(ctx TransactionContextInterface, userID string, orgn
 	if orgname == "patientorg" {
 		queryString = `{"selector": {"patientID":{"$eq":"` + userID + `"}}}`
 	} else if orgname == "providerorg" {
-		queryString = `{"selector": {"providerID":{"$eq":"` + userID + `"}}}`
+		queryString = `{"selector": {"$or": [{"providerID": {"$eq": "` + userID + `"}},{"newProviderID": {"$eq": "` + userID + `"}}]}}`
 	} else {
 		queryString = `{"selector": {"caregiverID":{"$eq":"` + userID + `"}}}`
 	}
