@@ -9,8 +9,7 @@ import (
 )
 
 // ListInterface defines functionality needed
-// to interact with the world state on behalf
-// of a commercial paper
+// to interact with the world state
 type ListInterface interface {
 	AddPatient(*PatientInfo) error
 	GetPatient(string) (*PatientInfo, error)
