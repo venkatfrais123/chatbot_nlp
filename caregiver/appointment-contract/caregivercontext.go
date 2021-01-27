@@ -18,14 +18,13 @@ type TransactionContextInterface interface {
 }
 
 // TransactionContext implementation of
-// TransactionContextInterface for use with
-// commercial paper contract
+// TransactionContextInterface
 type TransactionContext struct {
 	contractapi.TransactionContext
 	caregiverList *list
 }
 
-// GetPaperList return paper list
+// GetCaregiverList ..
 func (tc *TransactionContext) GetCaregiverList() ListInterface {
 	if tc.caregiverList == nil {
 		tc.caregiverList = newList(tc)
